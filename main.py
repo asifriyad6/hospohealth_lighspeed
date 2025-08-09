@@ -66,7 +66,7 @@ def force_switch_months_to_hours(driver):
     raise Exception("❌ Could not switch all dropdowns to 'hours' after multiple attempts")
 
 options = webdriver.ChromeOptions()
-options.add_argument("--headless=new")
+#options.add_argument("--headless=new")
 options.add_argument("--no-sandbox")
 options.add_argument("--disable-dev-shm-usage")
 driver = webdriver.Chrome(options=options)
@@ -237,7 +237,7 @@ try:
 
     # Find the input inside combobox
     format_input = wrapper.find_element(By.CSS_SELECTOR, "input#listbox-input-qr-export-modal-format")
-
+    time.sleep(5)
     # Press Arrow Down multiple times to reach JSON (4th option)
     for i in range(1):  # CSV is index 0, so press 3 times to reach index 3 (4th item)
         format_input.send_keys(Keys.ARROW_DOWN)
@@ -247,7 +247,7 @@ try:
     # Now press ENTER to select JSON
     format_input.send_keys(Keys.ENTER)
     print("✅ Pressed ENTER to select JSON")
-
+    time.sleep(3)
     # Wait for the "Open in Browser" button to be present and clickable
     try:
         open_browser_btn = WebDriverWait(driver, 30).until(
@@ -272,12 +272,12 @@ try:
     # Parse JSON
     import json
     data = json.loads(json_text_1)
-
     print(json_text_1)
 
     # -----------------------------------------------
-    # 🚀 Go to the second dashboard
+    # 🚀 Go to the second dashboardp
     # -----------------------------------------------
+    time.sleep(3)
     driver.get("https://insights.kounta.com/insights?url=/embed/dashboards-next/1216")
 
     # Wait for iframe to load and switch to it
@@ -363,7 +363,7 @@ try:
     print("✅ Typed 'Donny|s Bar' into combobox input")
 
     # Wait a bit for suggestions to load
-    time.sleep(1)
+    time.sleep(2)
 
     # Press Arrow Down and Enter to select the first matching suggestion
     combo_input.send_keys(Keys.ARROW_DOWN)
@@ -371,13 +371,13 @@ try:
     combo_input.send_keys(Keys.RETURN)
     print("✅ Selected 'Donny|s Bar' from combobox suggestions")
 
-    time.sleep(1)  # wait a bit for UI to update
+    time.sleep(2)  # wait a bit for UI to update
 
     # Click outside input to close dropdown/modal
     driver.find_element(By.TAG_NAME, "body").click()
     print("✅ Clicked outside input to close modal/dropdown")
 
-    time.sleep(1)  # wait for modal to close
+    time.sleep(2)  # wait for modal to close
 
     # Wait for the Update button to be clickable
     update_btn_2 = WebDriverWait(driver, 20).until(
@@ -449,7 +449,7 @@ try:
     # Now press ENTER to select JSON
     format_input_2.send_keys(Keys.ENTER)
     print("✅ Pressed ENTER to select JSON")
-
+    time.sleep(3)
     # Wait for the "Open in Browser" button to be present and clickable
     try:
         open_browser_btn = WebDriverWait(driver, 30).until(
