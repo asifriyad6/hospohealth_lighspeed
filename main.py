@@ -457,14 +457,22 @@ try:
         print(f"❌ Could not click 'Open in Browser': {e}")
 
     # Wait for new tab
-    time.sleep(3)
+    time.sleep(10)
     tabs = driver.window_handles
     driver.switch_to.window(tabs[-1])
     print("✅ Switched to new tab")
 
-    # Get JSON content
-    json_text = driver.find_element(By.TAG_NAME, "pre").text
-    print("✅ Retrieved JSON text")
+    # Wait for non-empty <pre> text up to 30 seconds
+    try:
+        WebDriverWait(driver, 30).until(
+            lambda d: d.find_element(By.TAG_NAME, "pre").text.strip() != ""
+        )
+        json_text = driver.find_element(By.TAG_NAME, "pre").text.strip()
+        if not json_text:
+            raise Exception("JSON text is empty even after wait!")
+        data = json.loads(json_text)
+    except Exception as e:
+        print(f"❌ JSON parse error: {e}")
 
     # Parse JSON
     import json
