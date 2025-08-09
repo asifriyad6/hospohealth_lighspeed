@@ -6,6 +6,8 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import ElementClickInterceptedException, TimeoutException
 from selenium.webdriver.common.keys import Keys
+import json
+import requests
 import time
 
 def safe_click(driver, element, retries=3, delay=1):
@@ -456,35 +458,51 @@ try:
     except Exception as e:
         print(f"❌ Could not click 'Open in Browser': {e}")
 
-    # Wait for new tab
+    # Wait for new tab and switch
     time.sleep(10)
     tabs = driver.window_handles
     driver.switch_to.window(tabs[-1])
     print("✅ Switched to new tab")
 
-    # Wait for non-empty <pre> text up to 30 seconds
+    # Retry loop to get non-empty JSON text
+    max_json_attempts = 5
+    json_text = ""
+    for attempt in range(max_json_attempts):
+        try:
+            WebDriverWait(driver, 10).until(
+                lambda d: d.find_element(By.TAG_NAME, "pre").text.strip() != ""
+            )
+            json_text = driver.find_element(By.TAG_NAME, "pre").text.strip()
+            if json_text:
+                print(f"✅ Retrieved JSON text on attempt {attempt+1}, first 200 chars:\n{json_text[:200]}")
+                break
+        except Exception as e:
+            print(f"⚠️ Attempt {attempt+1} to get JSON text failed: {e}")
+        time.sleep(3)
+
+    if not json_text:
+        filename = "debug_no_json.html"
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write(driver.page_source)
+        print(f"❌ JSON text empty after {max_json_attempts} attempts. Page source saved as {filename}")
+
     try:
-        WebDriverWait(driver, 30).until(
-            lambda d: d.find_element(By.TAG_NAME, "pre").text.strip() != ""
-        )
-        json_text = driver.find_element(By.TAG_NAME, "pre").text.strip()
-        if not json_text:
-            raise Exception("JSON text is empty even after wait!")
-        data = json.loads(json_text)
+        data1 = json.loads(json_text)
     except Exception as e:
         print(f"❌ JSON parse error: {e}")
+        err_html = "debug_json_parse_error.html"
+        err_screenshot = "debug_json_parse_error.png"
+        with open(err_html, "w", encoding="utf-8") as f:
+            f.write(driver.page_source)
+        driver.save_screenshot(err_screenshot)
+        print(f"❌ Saved debug HTML to {err_html} and screenshot to {err_screenshot}")
+        data1 = None  # prevent crash; handle as needed
 
-    # Parse JSON
-    import json
-    data1 = json.loads(json_text)
     payload = {
         "no_of_reconciliations": reconciliations_value,
         "data": data,
         "data1": data1
     }
-
-    # POST to Laravel/n8n
-    import requests
     resp = requests.post("https://primary-production-3d6e.up.railway.app/webhook-test/88e57b55-ff1a-4324-b9ef-37fc2f48aa7b", json=payload)
     print("✅ Posted to N8N, response:", resp.status_code)
 
