@@ -63,15 +63,11 @@ def force_switch_months_to_hours(driver):
         time.sleep(2)
     raise Exception("❌ Could not switch all dropdowns to 'hours' after multiple attempts")
 
-service = Service("bin/chromedriver")
 options = webdriver.ChromeOptions()
-options.add_argument('--headless=new')
-options.add_argument('--no-sandbox')
-options.add_argument('--disable-dev-shm-usage')
-options.add_argument('--disable-gpu')
-options.add_argument('--window-size=1920,1080')
-
-driver = webdriver.Chrome(service=service, options=options)
+options.add_argument("--headless=new")
+options.add_argument("--no-sandbox")
+options.add_argument("--disable-dev-shm-usage")
+driver = webdriver.Chrome(options=options)
 
 try:
     driver.get("https://insights.kounta.com/insights?url=/embed/dashboards-next/1231")

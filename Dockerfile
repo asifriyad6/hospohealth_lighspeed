@@ -1,43 +1,41 @@
+# Use Python base image
 FROM python:3.11-slim
 
-# Install dependencies needed for Chrome
+# Prevent interactive prompts during apt installs
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install dependencies
 RUN apt-get update && apt-get install -y \
     wget \
     unzip \
     curl \
-    gnupg2 \
-    fonts-liberation \
-    libx11-xcb1 \
-    libxcomposite1 \
-    libxcursor1 \
-    libxdamage1 \
-    libxrandr2 \
-    libasound2 \
-    libatk1.0-0 \
-    libatk-bridge2.0-0 \
-    libcups2 \
-    libgbm1 \
-    libpango-1.0-0 \
-    libpangocairo-1.0-0 \
-    libxss1 \
-    libnss3 \
-    libxshmfence1 \
-    ca-certificates \
-    --no-install-recommends && rm -rf /var/lib/apt/lists/*
+    gnupg \
+    --no-install-recommends && \
+    rm -rf /var/lib/apt/lists/*
 
-# Install Google Chrome stable
-RUN curl -fsSL https://dl.google.com/linux/linux_signing_key.pub | apt-key add -
-RUN echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list
-RUN apt-get update && apt-get install -y google-chrome-stable
+# Install Google Chrome Stable
+RUN wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb && \
+    apt-get update && apt-get install -y ./google-chrome-stable_current_amd64.deb && \
+    rm google-chrome-stable_current_amd64.deb
 
+# Install ChromeDriver matching Chrome version
+RUN CHROME_VERSION=$(google-chrome --version | awk '{print $3}') && \
+    CHROME_DRIVER_VERSION=$(curl -s "https://googlechromelabs.github.io/chrome-for-testing/LATEST_RELEASE_${CHROME_VERSION%.*}") && \
+    wget https://storage.googleapis.com/chrome-for-testing-public/${CHROME_DRIVER_VERSION}/linux64/chromedriver-linux64.zip && \
+    unzip chromedriver-linux64.zip && \
+    mv chromedriver-linux64/chromedriver /usr/local/bin/chromedriver && \
+    chmod +x /usr/local/bin/chromedriver && \
+    rm -rf chromedriver-linux64 chromedriver-linux64.zip
+
+# Set display port for Chrome
+ENV DISPLAY=:99
+
+# Copy project files
 WORKDIR /app
+COPY . /app
 
-COPY requirements.txt .
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY chromedriver /usr/local/bin/chromedriver
-RUN chmod +x /usr/local/bin/chromedriver
-
-COPY . .
-
-CMD ["python3", "main.py"]
+# Command to run your script
+CMD ["python", "main.py"]
