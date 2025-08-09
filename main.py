@@ -438,7 +438,7 @@ try:
     format_input_2 = wrapper_2.find_element(By.CSS_SELECTOR, "input#listbox-input-qr-export-modal-format")
 
     # Press Arrow Down multiple times to reach JSON (4th option)
-    for i in range(1):  # CSV is index 0, so press 3 times to reach index 3 (4th item)
+    for i in range(2):  # CSV is index 0, so press 3 times to reach index 3 (4th item)
         format_input_2.send_keys(Keys.ARROW_DOWN)
         time.sleep(2)
     print("⬇️ Pressed ARROW_DOWN 2 times to highlight JSON")
