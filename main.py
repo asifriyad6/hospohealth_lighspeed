@@ -266,12 +266,14 @@ try:
     print("✅ Switched to new tab")
 
     # Get JSON content
-    json_text = driver.find_element(By.TAG_NAME, "pre").text
+    json_text_1 = driver.find_element(By.TAG_NAME, "pre").text
     print("✅ Retrieved JSON text")
 
     # Parse JSON
     import json
-    data = json.loads(json_text)
+    data = json.loads(json_text_1)
+
+    print(json_text_1)
 
     # -----------------------------------------------
     # 🚀 Go to the second dashboard
@@ -438,7 +440,8 @@ try:
     format_input_2 = wrapper_2.find_element(By.CSS_SELECTOR, "input#listbox-input-qr-export-modal-format")
 
     # Press Arrow Down multiple times to reach JSON (4th option)
-    for i in range(2):  # CSV is index 0, so press 3 times to reach index 3 (4th item)
+    time.sleep(5)
+    for i in range(1):  # CSV is index 0, so press 3 times to reach index 3 (4th item)
         format_input_2.send_keys(Keys.ARROW_DOWN)
         time.sleep(2)
     print("⬇️ Pressed ARROW_DOWN 2 times to highlight JSON")
