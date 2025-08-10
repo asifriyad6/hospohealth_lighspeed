@@ -242,6 +242,10 @@ try:
     time.sleep(2)
     format_input.send_keys(Keys.ARROW_DOWN)
     print("⬇️ Pressed ARROW_DOWN 2 times to highlight JSON")
+
+    # Now press ENTER to select JSON
+    format_input.send_keys(Keys.ENTER)
+    print("✅ Pressed ENTER to select JSON")
     
     # Get the input element
     format_input = wrapper.find_element(By.CSS_SELECTOR, "input#listbox-input-qr-export-modal-format")
@@ -255,10 +259,6 @@ try:
         print("✅ Currently selected: CSV")
     else:
         print("❌ Not CSV, current value is:", selected_value)
-
-    # Now press ENTER to select JSON
-    format_input.send_keys(Keys.ENTER)
-    print("✅ Pressed ENTER to select JSON")
 
     # Wait for the "Open in Browser" button to be present and clickable
     try:
