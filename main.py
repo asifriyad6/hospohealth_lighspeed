@@ -1,13 +1,10 @@
 from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import ElementClickInterceptedException, TimeoutException
 from selenium.webdriver.common.keys import Keys
-import json
-import requests
 import time
 
 def safe_click(driver, element, retries=3, delay=1):
@@ -65,10 +62,11 @@ def force_switch_months_to_hours(driver):
         time.sleep(2)
     raise Exception("❌ Could not switch all dropdowns to 'hours' after multiple attempts")
 
-options = webdriver.ChromeOptions()
-options.add_argument("--headless=new")
-options.add_argument("--no-sandbox")
-options.add_argument("--disable-dev-shm-usage")
+options = Options()
+#options.add_argument('--headless')
+options.add_argument('--no-sandbox')
+options.add_argument('--disable-dev-shm-usage')
+
 driver = webdriver.Chrome(options=options)
 
 try:
@@ -237,7 +235,7 @@ try:
 
     # Find the input inside combobox
     format_input = wrapper.find_element(By.CSS_SELECTOR, "input#listbox-input-qr-export-modal-format")
-    time.sleep(5)
+
     # Press Arrow Down multiple times to reach JSON (4th option)
     for i in range(1):  # CSV is index 0, so press 3 times to reach index 3 (4th item)
         format_input.send_keys(Keys.ARROW_DOWN)
@@ -247,7 +245,7 @@ try:
     # Now press ENTER to select JSON
     format_input.send_keys(Keys.ENTER)
     print("✅ Pressed ENTER to select JSON")
-    time.sleep(3)
+
     # Wait for the "Open in Browser" button to be present and clickable
     try:
         open_browser_btn = WebDriverWait(driver, 30).until(
@@ -266,18 +264,16 @@ try:
     print("✅ Switched to new tab")
 
     # Get JSON content
-    json_text_1 = driver.find_element(By.TAG_NAME, "pre").text
-    print("✅ Retrieved JSON text")
+    json_text = driver.find_element(By.TAG_NAME, "pre").text
+    print("✅ Retrieved JSON text 1")
 
     # Parse JSON
     import json
-    data = json.loads(json_text_1)
-    print(json_text_1)
+    data = json.loads(json_text)
 
     # -----------------------------------------------
-    # 🚀 Go to the second dashboardp
+    # 🚀 Go to the second dashboard
     # -----------------------------------------------
-    time.sleep(3)
     driver.get("https://insights.kounta.com/insights?url=/embed/dashboards-next/1216")
 
     # Wait for iframe to load and switch to it
@@ -363,7 +359,7 @@ try:
     print("✅ Typed 'Donny|s Bar' into combobox input")
 
     # Wait a bit for suggestions to load
-    time.sleep(2)
+    time.sleep(1)
 
     # Press Arrow Down and Enter to select the first matching suggestion
     combo_input.send_keys(Keys.ARROW_DOWN)
@@ -371,13 +367,13 @@ try:
     combo_input.send_keys(Keys.RETURN)
     print("✅ Selected 'Donny|s Bar' from combobox suggestions")
 
-    time.sleep(2)  # wait a bit for UI to update
+    time.sleep(1)  # wait a bit for UI to update
 
     # Click outside input to close dropdown/modal
     driver.find_element(By.TAG_NAME, "body").click()
     print("✅ Clicked outside input to close modal/dropdown")
 
-    time.sleep(2)  # wait for modal to close
+    time.sleep(1)  # wait for modal to close
 
     # Wait for the Update button to be clickable
     update_btn_2 = WebDriverWait(driver, 20).until(
@@ -440,7 +436,6 @@ try:
     format_input_2 = wrapper_2.find_element(By.CSS_SELECTOR, "input#listbox-input-qr-export-modal-format")
 
     # Press Arrow Down multiple times to reach JSON (4th option)
-    time.sleep(5)
     for i in range(1):  # CSV is index 0, so press 3 times to reach index 3 (4th item)
         format_input_2.send_keys(Keys.ARROW_DOWN)
         time.sleep(2)
@@ -449,7 +444,7 @@ try:
     # Now press ENTER to select JSON
     format_input_2.send_keys(Keys.ENTER)
     print("✅ Pressed ENTER to select JSON")
-    time.sleep(3)
+
     # Wait for the "Open in Browser" button to be present and clickable
     try:
         open_browser_btn = WebDriverWait(driver, 30).until(
@@ -461,58 +456,32 @@ try:
     except Exception as e:
         print(f"❌ Could not click 'Open in Browser': {e}")
 
-    # Wait for new tab and switch
-    time.sleep(10)
+    # Wait for new tab
+    time.sleep(3)
     tabs = driver.window_handles
     driver.switch_to.window(tabs[-1])
     print("✅ Switched to new tab")
 
-    # Retry loop to get non-empty JSON text
-    max_json_attempts = 5
-    json_text = ""
-    for attempt in range(max_json_attempts):
-        try:
-            WebDriverWait(driver, 10).until(
-                lambda d: d.find_element(By.TAG_NAME, "pre").text.strip() != ""
-            )
-            json_text = driver.find_element(By.TAG_NAME, "pre").text.strip()
-            if json_text:
-                print(f"✅ Retrieved JSON text on attempt {attempt+1}, first 200 chars:\n{json_text[:200]}")
-                break
-        except Exception as e:
-            print(f"⚠️ Attempt {attempt+1} to get JSON text failed: {e}")
-        time.sleep(3)
+    # Get JSON content
+    json_text_1 = driver.find_element(By.TAG_NAME, "pre").text
+    print("✅ Retrieved JSON text 2")
 
-    if not json_text:
-        filename = "debug_no_json.html"
-        with open(filename, "w", encoding="utf-8") as f:
-            f.write(driver.page_source)
-        print(f"❌ JSON text empty after {max_json_attempts} attempts. Page source saved as {filename}")
-
-    try:
-        data1 = json.loads(json_text)
-    except Exception as e:
-        print(f"❌ JSON parse error: {e}")
-        err_html = "debug_json_parse_error.html"
-        err_screenshot = "debug_json_parse_error.png"
-        with open(err_html, "w", encoding="utf-8") as f:
-            f.write(driver.page_source)
-        driver.save_screenshot(err_screenshot)
-        print(f"❌ Saved debug HTML to {err_html} and screenshot to {err_screenshot}")
-        data1 = None  # prevent crash; handle as needed
-
+    # Parse JSON
+    import json
+    data1 = json.loads(json_text_1)
     payload = {
         "no_of_reconciliations": reconciliations_value,
         "data": data,
         "data1": data1
     }
+
+    # POST to Laravel/n8n
+    import requests
     resp = requests.post("https://primary-production-3d6e.up.railway.app/webhook-test/88e57b55-ff1a-4324-b9ef-37fc2f48aa7b", json=payload)
     print("✅ Posted to N8N, response:", resp.status_code)
 
 except Exception as e:
     print(f"❌ Exception occurred: {e}")
-    with open("debug_output.html", "w", encoding="utf-8") as f:
-        f.write(driver.page_source)
 
 finally:
     driver.quit()
