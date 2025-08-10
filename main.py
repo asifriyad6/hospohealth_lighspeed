@@ -239,10 +239,10 @@ try:
     # Press Arrow Down multiple times to reach JSON (4th option)
 
     format_input.send_keys(Keys.ARROW_DOWN)
-    time.sleep(2)
-    format_input.send_keys(Keys.ARROW_DOWN)
+    # time.sleep(2)
+    # format_input.send_keys(Keys.ARROW_DOWN)
     print("⬇️ Pressed ARROW_DOWN 2 times to highlight JSON")
-
+    time.sleep(1)
     # Now press ENTER to select JSON
     format_input.send_keys(Keys.ENTER)
     print("✅ Pressed ENTER to select JSON")
