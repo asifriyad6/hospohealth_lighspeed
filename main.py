@@ -235,12 +235,29 @@ try:
 
     # Find the input inside combobox
     format_input = wrapper.find_element(By.CSS_SELECTOR, "input#listbox-input-qr-export-modal-format")
-
+    time.sleep(2)
     # Press Arrow Down multiple times to reach JSON (4th option)
     for i in range(1):  # CSV is index 0, so press 3 times to reach index 3 (4th item)
         format_input.send_keys(Keys.ARROW_DOWN)
         time.sleep(2)
     print("⬇️ Pressed ARROW_DOWN 2 times to highlight JSON")
+    
+    # Get the input element
+    format_input = wrapper.find_element(By.CSS_SELECTOR, "input#listbox-input-qr-export-modal-format")
+
+    # Get its current value
+    selected_value = format_input.get_attribute("value")
+
+    print("📄 Current value in combobox:", selected_value)
+
+    if selected_value.strip().lower() == "CSV":
+        print("✅ Currently selected: CSV")
+        for i in range(2):  # CSV is index 0, so press 3 times to reach index 3 (4th item)
+            format_input.send_keys(Keys.ARROW_DOWN)
+            time.sleep(2)
+        print("⬇️ Retry! Pressed ARROW_DOWN 2 times to highlight JSON")
+    else:
+        print("❌ Not CSV, current value is:", selected_value)
 
     # Now press ENTER to select JSON
     format_input.send_keys(Keys.ENTER)
