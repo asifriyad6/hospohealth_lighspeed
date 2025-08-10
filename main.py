@@ -448,16 +448,21 @@ try:
 
     # Find the input inside combobox
     format_input_2 = wrapper_2.find_element(By.CSS_SELECTOR, "input#listbox-input-qr-export-modal-format")
-
+    time.sleep(2)
     # Press Arrow Down multiple times to reach JSON (4th option)
-    for i in range(1):  # CSV is index 0, so press 3 times to reach index 3 (4th item)
-        format_input_2.send_keys(Keys.ARROW_DOWN)
-        time.sleep(2)
+    format_input_2.send_keys(Keys.ARROW_DOWN)
+    time.sleep(2)
+    format_input_2.send_keys(Keys.ARROW_DOWN)
     print("⬇️ Pressed ARROW_DOWN 2 times to highlight JSON")
 
     # Now press ENTER to select JSON
     format_input_2.send_keys(Keys.ENTER)
     print("✅ Pressed ENTER to select JSON")
+
+    format_input_2 = wrapper_2.find_element(By.CSS_SELECTOR, "input#listbox-input-qr-export-modal-format")
+    selected_value_2 = format_input_2.get_attribute("value")
+
+    print("📄 Current value in combobox:", selected_value_2)
 
     # Wait for the "Open in Browser" button to be present and clickable
     try:
