@@ -6,7 +6,10 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import ElementClickInterceptedException, TimeoutException
 from selenium.webdriver.common.keys import Keys
 import time
-
+import json
+import csv
+import requests
+from io import StringIO
 def safe_click(driver, element, retries=3, delay=1):
     for attempt in range(retries):
         try:
@@ -226,27 +229,8 @@ try:
         EC.presence_of_element_located((By.ID, "qr-export-modal-format"))
     )
 
-    # Now find and click the caret icon inside it
-    caret_icon = wrapper.find_element(By.CSS_SELECTOR, "[data-testid='caret']")
-    safe_click(driver, caret_icon)
-    print("✅ Clicked caret icon to open dropdown")
+    time.sleep(2)  # allow menu to open
 
-    time.sleep(3)  # allow menu to open
-
-    # Find the input inside combobox
-    format_input = wrapper.find_element(By.CSS_SELECTOR, "input#listbox-input-qr-export-modal-format")
-    time.sleep(3)
-    # Press Arrow Down multiple times to reach JSON (4th option)
-
-    format_input.send_keys(Keys.ARROW_DOWN)
-    # time.sleep(2)
-    # format_input.send_keys(Keys.ARROW_DOWN)
-    print("⬇️ Pressed ARROW_DOWN 2 times to highlight JSON")
-    time.sleep(1)
-    # Now press ENTER to select JSON
-    format_input.send_keys(Keys.ENTER)
-    print("✅ Pressed ENTER to select JSON")
-    
     # Get the input element
     format_input = wrapper.find_element(By.CSS_SELECTOR, "input#listbox-input-qr-export-modal-format")
 
@@ -254,13 +238,6 @@ try:
     selected_value = format_input.get_attribute("value")
 
     print("📄 Current value in combobox:", selected_value)
-
-    if selected_value.strip().lower() == "CSV":
-        print("✅ Currently selected: CSV")
-    else:
-        print("❌ Not CSV, current value is:", selected_value)
-
-    # Wait for the "Open in Browser" button to be present and clickable
     try:
         open_browser_btn = WebDriverWait(driver, 30).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, "button#qr-export-modal-open"))
@@ -276,14 +253,18 @@ try:
     tabs = driver.window_handles
     driver.switch_to.window(tabs[-1])
     print("✅ Switched to new tab")
+    time.sleep(5)
 
-    # Get JSON content
-    json_text = driver.find_element(By.TAG_NAME, "pre").text
-    print("✅ Retrieved JSON text 1")
+    # Get CSV content
+    csv_data = driver.find_element(By.TAG_NAME, "pre").text
+    print("✅ Retrieved CSV data from first dashboard")
+    f = StringIO(csv_data)
+    reader = csv.DictReader(f)
 
     # Parse JSON
-    import json
-    data = json.loads(json_text)
+    data_list = list(reader)
+    data = json.dumps(data_list, indent=2)
+    print("✅ Parsed CSV data into JSON format")
 
     # -----------------------------------------------
     # 🚀 Go to the second dashboard
@@ -439,25 +420,7 @@ try:
         EC.presence_of_element_located((By.ID, "qr-export-modal-format"))
     )
 
-    # Now find and click the caret icon inside it
-    caret_icon_2 = wrapper_2.find_element(By.CSS_SELECTOR, "[data-testid='caret']")
-    safe_click(driver, caret_icon_2)
-    print("✅ Clicked caret icon to open dropdown")
-
     time.sleep(3)  # allow menu to open
-
-    # Find the input inside combobox
-    format_input_2 = wrapper_2.find_element(By.CSS_SELECTOR, "input#listbox-input-qr-export-modal-format")
-    time.sleep(2)
-    # Press Arrow Down multiple times to reach JSON (4th option)
-    format_input_2.send_keys(Keys.ARROW_DOWN)
-    time.sleep(2)
-    format_input_2.send_keys(Keys.ARROW_DOWN)
-    print("⬇️ Pressed ARROW_DOWN 2 times to highlight JSON")
-
-    # Now press ENTER to select JSON
-    format_input_2.send_keys(Keys.ENTER)
-    print("✅ Pressed ENTER to select JSON")
 
     format_input_2 = wrapper_2.find_element(By.CSS_SELECTOR, "input#listbox-input-qr-export-modal-format")
     selected_value_2 = format_input_2.get_attribute("value")
@@ -480,14 +443,18 @@ try:
     tabs = driver.window_handles
     driver.switch_to.window(tabs[-1])
     print("✅ Switched to new tab")
+    time.sleep(5)
 
-    # Get JSON content
-    json_text_1 = driver.find_element(By.TAG_NAME, "pre").text
-    print("✅ Retrieved JSON text 2")
+   # Get CSV content
+    csv_data_1 = driver.find_element(By.TAG_NAME, "pre").text
+    print("✅ Retrieved CSV data from second dashboard")
+    f1 = StringIO(csv_data_1)
+    reader1 = csv.DictReader(f1)
 
     # Parse JSON
-    import json
-    data1 = json.loads(json_text_1)
+    data_list_1 = list(reader1)
+    data1 = json.dumps(data_list_1, indent=2)
+    print("✅ Parsed CSV data into JSON format")
     payload = {
         "no_of_reconciliations": reconciliations_value,
         "data": data,
